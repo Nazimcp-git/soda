@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Grid</title>
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  background: #f8f9fb;
+  margin: 0;
+  padding: 20px;
+  color: #111;
+}
+
+h1 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Grid Layout: Always 3 columns */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Card design: clean, sharp corners, no radius */
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Square images */
+.card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* Makes image square */
+  object-fit: cover;
+  border: none;
+}
+
+/* Card content */
+.card .title {
+  font-weight: bold;
+  margin: 8px 0 4px;
+}
+
+.card .price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-top: auto;
+}
+
+/* Responsive: for small screens show fewer columns */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Admin Page Styles */
+form {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+input, button {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: #111827;
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+button:hover {
+  background: #000;
+}
+
+.list {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.actions button {
+  margin-left: 5px;
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script>
+    // firebase-config.js
+var firebaseConfig = {
+  apiKey: "AIzaSyBYCiz_Ec0GeQajAKP3RrxylR1bjIr9wnQ",
+                authDomain: "nishan-8d4db.firebaseapp.com",
+                databaseURL: "https://nishan-8d4db-default-rtdb.firebaseio.com",
+                projectId: "nishan-8d4db",
+                storageBucket: "nishan-8d4db.appspot.com",
+                messagingSenderId: "856716933837",
+                appId: "1:856716933837:web:b6114e617a0c001d3f8784",
+                measurementId: "G-ZB1X291PJY"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+const storage = firebase.storage();
+
+  </script>
+</head>
+<body>
+  <h1>Our Products</h1>
+  <div class="grid" id="productGrid"></div>
+
+  <script>
+    const grid = document.getElementById('productGrid');
+    db.ref('products').on('value', snapshot => {
+      grid.innerHTML = '';
+      const data = snapshot.val();
+      if (data) {
+        Object.keys(data).forEach(id => {
+          const p = data[id];
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src=\"${p.imageUrl}\" alt=\"${p.title}\">
+            <div class=\"title\">${p.title}</div>
+            <div class=\"price\">₹${p.price}</div>
+          `;
+          grid.appendChild(card);
+        });
+      } else {
+        grid.innerHTML = '<p>No products available.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

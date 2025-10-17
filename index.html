@@ -781,6 +781,58 @@
             }
         }
     </style>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* Card design: clean, sharp corners, no radius */
+        .card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Square images */
+        .card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            /* Makes image square */
+            object-fit: cover;
+            border: none;
+        }
+
+        /* Card content */
+        .card .title {
+            font-weight: bold;
+            margin: 8px 0 4px;
+        }
+
+        .card .price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-top: auto;
+        }
+
+        /* Responsive: for small screens show fewer columns */
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -1044,12 +1096,53 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // firebase-config.js
+        var firebaseConfig = {
+            apiKey: "AIzaSyBYCiz_Ec0GeQajAKP3RrxylR1bjIr9wnQ",
+            authDomain: "nishan-8d4db.firebaseapp.com",
+            databaseURL: "https://nishan-8d4db-default-rtdb.firebaseio.com",
+            projectId: "nishan-8d4db",
+            storageBucket: "nishan-8d4db.appspot.com",
+            messagingSenderId: "856716933837",
+            appId: "1:856716933837:web:b6114e617a0c001d3f8784",
+            measurementId: "G-ZB1X291PJY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        const db = firebase.database();
+        const storage = firebase.storage();
+
+    </script>
 
     <!-- ✅ Main App Script -->
     <script>
+        const grid = document.getElementById('product-grid');
+        db.ref('products').on('value', snapshot => {
+            grid.innerHTML = '';
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).forEach(id => {
+                    const p = data[id];
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+            <img src=\"${p.imageUrl}\" alt=\"${p.title}\">
+            <div class=\"title\">${p.title}</div>
+            <div class=\"price\">₹${p.price}</div>
+          `;
+                    grid.appendChild(card);
+                });
+            } else {
+                grid.innerHTML = '<p>No products available.</p>';
+            }
+        });
+    </script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
             // 🔧 Firebase configuration
-            
+
 
             // ✅ Reveal animation when cards come into view
             function initializeScrollAnimations() {
@@ -1140,46 +1233,7 @@
             });
 
 
-            // --- Firebase Form Handling (Firestore) ---
-            const newsletterForm = document.getElementById('newsletterForm');
-            const newsletterMessage = document.getElementById('newsletterMessage');
-            newsletterForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const emailInput = document.getElementById('newsletterEmail');
-                db.collection("newsletter_subscribers").add({
-                    email: emailInput.value,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    newsletterMessage.textContent = 'Thank you for subscribing!';
-                    newsletterMessage.className = 'form-message success';
-                    newsletterForm.reset();
-                }).catch((error) => {
-                    newsletterMessage.textContent = 'An error occurred. Please try again.';
-                    newsletterMessage.className = 'form-message error';
-                });
-            });
-
-            const contactForm = document.getElementById('contactForm');
-            const contactFormMessage = document.getElementById('contactFormMessage');
-            contactForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const nameInput = document.getElementById('contactName');
-                const emailInput = document.getElementById('contactEmail');
-                const messageInput = document.getElementById('contactMessage');
-                db.collection("contact_submissions").add({
-                    name: nameInput.value,
-                    email: emailInput.value,
-                    message: messageInput.value,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    contactFormMessage.textContent = 'Your message has been sent!';
-                    contactFormMessage.className = 'form-message success';
-                    contactForm.reset();
-                }).catch((error) => {
-                    contactFormMessage.textContent = 'Error sending message. Please try again.';
-                    contactFormMessage.className = 'form-message error';
-                });
-            });
+            
 
         });
     </script>
